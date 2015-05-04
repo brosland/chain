@@ -1,18 +1,26 @@
 <?php
 
-namespace Brosland\Blockchain\DI;
+namespace Brosland\Chain\DI;
 
-class BlockchainExtension extends \Nette\DI\CompilerExtension
+class ChainExtension extends \Nette\DI\CompilerExtension
 {
+	
+
+
 	/**
 	 * @var array
 	 */
 	private static $DEFAULTS = [
-		'account' => [
-			'id' => NULL,
-			'secret' => NULL
-		],
+		'account' => [],
 		'notificationRoute' => 'chain-notification'
+	];
+	/**
+	 * @var array
+	 */
+	private static $ACCOUNT_DEFAULTS = [
+		'id' => NULL,
+		'secret' => NULL,
+		'blockChain' => self::BLOCK_CHAIN_BITCOIN
 	];
 
 
@@ -23,13 +31,12 @@ class BlockchainExtension extends \Nette\DI\CompilerExtension
 		$builder = $this->getContainerBuilder();
 		$config = $this->getConfig(self::$DEFAULTS);
 
-		$chain = $builder->addDefinition($this->prefix('chain'))
-			->setClass(\Brosland\Chain\Chain::class);
+		$accounts = $this->loadAccounts($config['account']);
 
-		foreach ($this->loadWallets($config['account']) as $name => $account)
-		{
-			$chain->addSetup('addAccount', array ($name, $account));
-		}
+		$builder->addDefinition($this->prefix('chain'))
+			->setClass(\Brosland\Chain\Chain::class)
+			->addSetup('injectServiceLocator')
+			->addSetup('injectServiceMap', array ($accounts));
 
 		$router = $builder->addDefinition($this->prefix('router'))
 			->setClass(\Brosland\Chain\Routers\NotificationRouter::class)
@@ -45,9 +52,9 @@ class BlockchainExtension extends \Nette\DI\CompilerExtension
 
 	/**
 	 * @param array $definitions
-	 * @return \Nette\DI\ServiceDefinition[]
+	 * @return array
 	 */
-	private function loadWallets($definitions)
+	private function loadAccounts($definitions)
 	{
 		if (isset($definitions['id']))
 		{
@@ -55,27 +62,39 @@ class BlockchainExtension extends \Nette\DI\CompilerExtension
 		}
 
 		$builder = $this->getContainerBuilder();
-		$services = array ();
+		$accounts = array ();
 
 		foreach ($definitions as $name => $account)
 		{
+			$account = $this->mergeConfig($account, self::$ACCOUNT_DEFAULTS);
 			$serviceName = $this->prefix('account.' . $name);
 
 			$service = $builder->addDefinition($serviceName)
 				->setClass(\Brosland\Chain\Account::class)
 				->setArguments(array (
-					$account['id'],
-					$account['secret']
-				));
+				$account['id'],
+				$account['secret']
+			));
 
-			if (!empty($services))
+			if (!empty($accounts))
 			{
 				$service->setAutowired(FALSE);
 			}
 
-			$services[$name] = $service;
+			$accounts[$name] = $serviceName;
 		}
 
-		return $services;
+		return $accounts;
+	}
+
+	/**
+	 * @param array $config
+	 * @param array $defaults
+	 * @return array
+	 */
+	private function mergeConfig($config, $defaults)
+	{
+		return \Nette\DI\Config\Helpers::merge(
+				$config, $this->compiler->getContainerBuilder()->expand($defaults));
 	}
 }
