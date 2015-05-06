@@ -43,21 +43,38 @@ class Account extends \Nette\Object
 	//****************************** DATA API ********************************//
 
 	/**
-	 * Returns basic balance details for one or more Bitcoin addresses.
+	 * Returns basic balance details for one Bitcoin address.
 	 * 
 	 * @link https://chain.com/docs#bitcoin-address
-	 * @param string|array $address
+	 * @param string $address
+	 * @return Address
 	 */
 	public function getAddress($address)
 	{
-		if (is_array($address))
-		{
-			$address = implode(',', $address);
-		}
-
 		$request = new Request($this->baseUrl . '/addresses/' . $address);
 
 		return new Address($this->sendRequest($request));
+	}
+
+	/**
+	 * Returns basic balance details for more Bitcoin addresses.
+	 * 
+	 * @link https://chain.com/docs#bitcoin-address
+	 * @param string[] $addresses
+	 * @return Address[]
+	 */
+	public function getAddresses(array $addresses)
+	{
+		$request = new Request($this->baseUrl . '/addresses/' . implode(',', $addresses));
+		$response = $this->sendRequest($request);
+		$result = [];
+
+		foreach ($response as $address)
+		{
+			$result[] = new Address($address);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -149,7 +166,7 @@ class Account extends \Nette\Object
 	 * 
 	 * @link https://chain.com/docs#bitcoin-address-unspents
 	 * @param string|array $address
-	 * @return array
+	 * @return TransactionOutput[]
 	 */
 	public function getUnspentsByAddress($address)
 	{
