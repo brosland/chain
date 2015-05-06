@@ -18,7 +18,7 @@ class NotificationRequest extends \Nette\Object
 	 * @param string $blockChain
 	 * @return NotificationRequest
 	 */
-	public function createAddressNotificationRequest($address, $url, $blockChain)
+	public static function createForAddress($address, $url, $blockChain = Chain::BLOCK_CHAIN_BITCOIN)
 	{
 		$request = new NotificationRequest(Notification::TYPE_ADDRESS, $url, $blockChain);
 		$request->parameters['address'] = $address;
@@ -32,7 +32,7 @@ class NotificationRequest extends \Nette\Object
 	 * @param string $blockChain
 	 * @return NotificationRequest
 	 */
-	public function createTransactionNotificationRequest($txHash, $url, $blockChain)
+	public static function createForTransaction($txHash, $url, $blockChain = Chain::BLOCK_CHAIN_BITCOIN)
 	{
 		$request = new NotificationRequest(Notification::TYPE_TRANSACTION, $url, $blockChain);
 		$request->parameters['transaction_hash'] = $txHash;

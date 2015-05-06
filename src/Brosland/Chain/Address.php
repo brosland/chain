@@ -2,6 +2,8 @@
 
 namespace Brosland\Chain;
 
+use DateTime;
+
 class Address extends \Nette\Object
 {
 	/**
@@ -15,12 +17,11 @@ class Address extends \Nette\Object
 	 */
 	public function __construct(array $address)
 	{
-		$address['time'] = DateTime::createFromFormat(DateTime::ISO8601, $address['time']);
-
 		$this->address = $address;
 	}
 
 	/**
+	 * The Bitcoin public address.
 	 * 
 	 * @return string
 	 */
@@ -30,6 +31,9 @@ class Address extends \Nette\Object
 	}
 
 	/**
+	 * All-time confirmed balance + current amount received in unconfirmed
+	 * transactions - current amount sent in unconfirmed transactions.
+	 * This is the amount available to create new transactions.
 	 * 
 	 * @return string
 	 */
@@ -39,6 +43,8 @@ class Address extends \Nette\Object
 	}
 
 	/**
+	 * All-time confirmed amount received + current amount received in unconfirmed transactions.
+	 * This does not include change received back to the address.
 	 * 
 	 * @return string
 	 */
@@ -48,6 +54,8 @@ class Address extends \Nette\Object
 	}
 
 	/**
+	 * All-time confirmed amount sent + current amount sent in unconfirmed transactions.
+	 * This does not include change sent back to the address.
 	 * 
 	 * @return string
 	 */
@@ -57,6 +65,7 @@ class Address extends \Nette\Object
 	}
 
 	/**
+	 * All-time balance of confirmed transactions.
 	 * 
 	 * @return string
 	 */
@@ -66,6 +75,7 @@ class Address extends \Nette\Object
 	}
 
 	/**
+	 * All-time confirmed amount received. This does not include change received back to the address.
 	 * 
 	 * @return string
 	 */
@@ -75,6 +85,7 @@ class Address extends \Nette\Object
 	}
 
 	/**
+	 * All-time confirmed amount sent. This does not include change sent back to the address.
 	 * 
 	 * @return string
 	 */

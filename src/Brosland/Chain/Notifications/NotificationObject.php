@@ -7,7 +7,8 @@ use Brosland\Chain\Notifications\Notification;
 class NotificationObject extends \Nette\Object
 {
 	const STATE_ENABLED = 'enabled',
-		STATE_DISABLED = 'disabled';
+		STATE_DISABLED = 'disabled',
+		STATE_DELETED = 'deleted';
 
 
 	/**

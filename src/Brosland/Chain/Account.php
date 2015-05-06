@@ -2,23 +2,22 @@
 
 namespace Brosland\Chain;
 
-use Brosland\Notifications\NotificationRequest;
+use Brosland\Chain\Notifications\NotificationObject,
+	Brosland\Chain\Notifications\NotificationRequest,
+	Kdyby\Curl\CurlSender,
+	Kdyby\Curl\Request,
+	Nette\Utils\Json;
 
 class Account extends \Nette\Object
 {
-
 	/**
 	 * @var string
 	 */
-	private $id;
+	private $baseUrl;
 	/**
-	 * @var string
+	 * @var CurlSender
 	 */
-	private $secret;
-	/**
-	 * @var string
-	 */
-	private $blockChain;
+	private $sender;
 
 
 	/**
@@ -33,11 +32,14 @@ class Account extends \Nette\Object
 			throw new \Nette\InvalidArgumentException("Unknown block chain {$blockChain}.");
 		}
 
-		$this->id = $id;
-		$this->secret = $secret;
-		$this->blockChain = $blockChain;
-	}
+		$this->baseUrl = Chain::URL . '/' . $blockChain;
 
+		$this->sender = new CurlSender();
+		$this->sender->headers['Content-Type'] = 'application/json';
+		$this->sender->options['HTTPAUTH'] = CURLAUTH_BASIC;
+		$this->sender->options['USERPWD'] = $id . ':' . $secret;
+		$this->sender->options['CAINFO'] = __DIR__ . '/certificates/cacert.pem';
+	}
 	//****************************** DATA API ********************************//
 
 	/**
@@ -48,7 +50,14 @@ class Account extends \Nette\Object
 	 */
 	public function getAddress($address)
 	{
-		
+		if (is_array($address))
+		{
+			$address = implode(',', $address);
+		}
+
+		$request = new Request($this->baseUrl . '/addresses/' . $address);
+
+		return new Address($this->sendRequest($request));
 	}
 
 	/**
@@ -60,7 +69,9 @@ class Account extends \Nette\Object
 	 */
 	public function getTransaction($hash)
 	{
-		
+		$request = new Request($this->baseUrl . '/transactions/' . $hash);
+
+		return new Transaction($this->sendRequest($request));
 	}
 
 	/**
@@ -69,11 +80,25 @@ class Account extends \Nette\Object
 	 * @link https://chain.com/docs#bitcoin-address-transactions
 	 * @param string|array $address
 	 * @param int $limit The number of transactions to return, starting with most recent (default=50, max=500).
-	 * @return Address[]
+	 * @return Transaction[]
 	 */
 	public function getTransactionsByAddress($address, $limit = NULL)
 	{
-		
+		if (is_array($address))
+		{
+			$address = implode(',', $address);
+		}
+
+		$request = new Request($this->baseUrl . '/addresses/' . $address . '/transactions');
+		$response = $this->sendRequest($request, ['limit' => $limit]);
+		$transactions = [];
+
+		foreach ($response as $transaction)
+		{
+			$transactions[] = new Transaction($transaction);
+		}
+
+		return $transactions;
 	}
 
 	/**
@@ -85,7 +110,9 @@ class Account extends \Nette\Object
 	 */
 	public function getTransactionConfidence($hash)
 	{
-		
+		$request = new Request($this->baseUrl . '/transactions/' . $hash . '/confidence');
+
+		return new TransactionConfidence($this->sendRequest($request));
 	}
 
 	/**
@@ -95,27 +122,30 @@ class Account extends \Nette\Object
 	 * @param string $hash
 	 * @return string
 	 */
-	public function getTransactionHex()
+	public function getTransactionHex($hash)
 	{
-		
+		$request = new Request($this->baseUrl . '/transactions/' . $hash . '/hex');
+
+		return $this->sendRequest($request)['hex'];
 	}
 
 	/**
 	 * Returns details about a Bitcoin block, including all transaction hashes.
 	 * 
 	 * @link https://chain.com/docs#bitcoin-block
-	 * @param string $hash
+	 * @param string|int $hashOrHeight
 	 * @return Block
 	 */
-	public function getBlock($hash)
+	public function getBlock($hashOrHeight = 'latest')
 	{
-		
+		$request = new Request($this->baseUrl . '/blocks/' . $hashOrHeight);
+
+		return new Block($this->sendRequest($request));
 	}
 
 	/**
 	 * Returns a collection of unspent outputs for a Bitcoin address. These outputs
-	 * can be used as inputs for a new transaction. See our blog post for information
-	 * on creating a new transaction with unspent outputs.
+	 * can be used as inputs for a new transaction. For multiple addresses (Max=200)
 	 * 
 	 * @link https://chain.com/docs#bitcoin-address-unspents
 	 * @param string|array $address
@@ -123,7 +153,21 @@ class Account extends \Nette\Object
 	 */
 	public function getUnspentsByAddress($address)
 	{
-		
+		if (is_array($address))
+		{
+			$address = implode(',', $address);
+		}
+
+		$request = new Request($this->baseUrl . '/addresses/' . $address . '/unspents');
+		$response = $this->sendRequest($request);
+		$outputs = [];
+
+		foreach ($response as $output)
+		{
+			$outputs[] = new TransactionOutput($output);
+		}
+
+		return $outputs;
 	}
 
 	/**
@@ -135,7 +179,16 @@ class Account extends \Nette\Object
 	 */
 	public function getOpReturnsByAddress($address)
 	{
-		
+		$request = new Request($this->baseUrl . '/addresses/' . $address . '/op-returns');
+		$response = $this->sendRequest($request);
+		$opReturns = [];
+
+		foreach ($response as $opReturn)
+		{
+			$opReturns[] = new OpReturn($opReturn);
+		}
+
+		return $opReturns;
 	}
 
 	/**
@@ -144,11 +197,13 @@ class Account extends \Nette\Object
 	 * 
 	 * @link https://chain.com/docs#bitcoin-transaction-op-return
 	 * @param string $hash
-	 * @return OpReturn[]
+	 * @return OpReturn
 	 */
-	public function getOpReturnsByTransaction($hash)
+	public function getOpReturnByTransaction($hash)
 	{
-		
+		$request = new Request($this->baseUrl . '/transactions/' . $hash . '/op-return');
+
+		return new OpReturn($this->sendRequest($request));
 	}
 
 	/**
@@ -156,32 +211,100 @@ class Account extends \Nette\Object
 	 * in the block which contain an OP_RETURN output script.
 	 * 
 	 * @link https://chain.com/docs#bitcoin-block-op-returns
-	 * @param string $hash
+	 * @param string|int $hashOrHeight
 	 * @return OpReturn[]
 	 */
-	public function getOpReturnsByBlock($hash)
+	public function getOpReturnsByBlock($hashOrHeight)
 	{
-		
-	}
+		$request = new Request($this->baseUrl . '/blocks/' . $hashOrHeight . '/op-returns');
+		$response = $this->sendRequest($request);
+		$opReturns = [];
 
-	
+		foreach ($response as $opReturn)
+		{
+			$opReturns[] = new OpReturn($opReturn);
+		}
+
+		return $opReturns;
+	}
 	//**************************** NOTIFICATIONS *****************************//
 
 	/**
+	 * Creates a new Notification of a specific type.
 	 * 
-	 * @param NotificationRequest $request
-	 * @return \Brosland\Chain\NotificationResponse
+	 * @param NotificationRequest $notificationRequest
+	 * @return NotificationObject
 	 */
-	public function createNotification(NotificationRequest $request)
+	public function addNotificationObject(NotificationRequest $notificationRequest)
 	{
-		$response = $this->sendRequest('notifications', $request->getParameters());
+		$request = new Request(Chain::URL . '/notifications');
+		$request->setPost(Json::encode($notificationRequest->getParameters()));
 
-		return new NotificationResponse($response);
+		return NotificationObject::createFromArray($this->sendRequest($request));
 	}
-	
-	
-	
+
+	/**
+	 * Returns a list of all Notifications associated with a Chain API KEY.
+	 * 
+	 * @return NotificationObject[]
+	 */
+	public function getNotificationObjects()
+	{
+		$response = $this->sendRequest(new Request(Chain::URL . '/notifications'));
+
+		$notificationObjects = [];
+
+		foreach ($response as $notificationObject)
+		{
+			$notificationObjects[] = NotificationObject::createFromArray($notificationObject);
+		}
+
+		return $notificationObjects;
+	}
+
+	/**
+	 * Deletes a specific Notification.
+	 * 
+	 * @param string $id
+	 */
+	public function removeNotificationObject($id)
+	{
+		$request = new Request(Chain::URL . '/notifications/' . $id);
+		$request->setMethod('DELETE');
+
+		return NotificationObject::createFromArray($this->sendRequest($request));
+	}
 	//************************************************************************//
 
-	
+	/**
+	 * @param Request $request
+	 * @param string|array $query
+	 * @return mixed
+	 * @throws ChainException
+	 */
+	private function sendRequest(Request $request, $query = NULL)
+	{
+		try
+		{
+			$response = NULL;
+
+			if (!empty($query))
+			{
+				$request->setSender($this->sender);
+				$response = $request->get($query);
+			}
+			else
+			{
+				$response = $this->sender->send($request);
+			}
+
+			return Json::decode($response->getResponse(), Json::FORCE_ARRAY);
+		}
+		catch (\Kdyby\Curl\CurlException $ex)
+		{
+			$response = Json::decode($ex->getResponse()->getResponse());
+
+			throw new ChainException($response->message, $ex->getCode());
+		}
+	}
 }

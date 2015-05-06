@@ -17,16 +17,16 @@ class Transaction extends \Nette\Object
 	 */
 	public function __construct(array $transaction)
 	{
-		if (isset($transaction['block_time']))
+		if (!empty($transaction['block_time']))
 		{
 			$transaction['block_time'] = DateTime::createFromFormat(
 					DateTime::ISO8601, $transaction['block_time']);
 		}
 
-		if (isset($transaction['chain_received_at']))
+		if (!empty($transaction['chain_received_at']))
 		{
-			$transaction['block_time'] = DateTime::createFromFormat(
-					DateTime::ISO8601, $transaction['chain_received_at']);
+			$transaction['chain_received_at'] = DateTime::createFromFormat(
+					'Y-m-d\TH:i:s.uO', $transaction['chain_received_at']);
 		}
 
 		$inputs = [];

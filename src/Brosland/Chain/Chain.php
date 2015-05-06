@@ -6,6 +6,7 @@ use Nette\DI\Container;
 
 class Chain extends \Nette\Object
 {
+	const URL = 'https://api.chain.com/v2';
 	const BLOCK_CHAIN_BITCOIN = 'bitcoin',
 		BLOCK_CHAIN_TESTNET3 = 'testnet3';
 

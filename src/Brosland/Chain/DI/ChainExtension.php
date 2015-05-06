@@ -2,17 +2,15 @@
 
 namespace Brosland\Chain\DI;
 
+use Brosland\Chain\Chain;
+
 class ChainExtension extends \Nette\DI\CompilerExtension
 {
-	
-
-
 	/**
 	 * @var array
 	 */
 	private static $DEFAULTS = [
-		'account' => [],
-		'notificationRoute' => 'chain-notification'
+		'account' => []
 	];
 	/**
 	 * @var array
@@ -20,7 +18,7 @@ class ChainExtension extends \Nette\DI\CompilerExtension
 	private static $ACCOUNT_DEFAULTS = [
 		'id' => NULL,
 		'secret' => NULL,
-		'blockChain' => self::BLOCK_CHAIN_BITCOIN
+		'blockChain' => Chain::BLOCK_CHAIN_BITCOIN
 	];
 
 
@@ -36,18 +34,7 @@ class ChainExtension extends \Nette\DI\CompilerExtension
 		$builder->addDefinition($this->prefix('chain'))
 			->setClass(\Brosland\Chain\Chain::class)
 			->addSetup('injectServiceLocator')
-			->addSetup('injectServiceMap', array ($accounts));
-
-		$router = $builder->addDefinition($this->prefix('router'))
-			->setClass(\Brosland\Chain\Routers\NotificationRouter::class)
-			->setArguments(array ($config['notificationRoute']))
-			->setAutowired(FALSE);
-
-		if ($builder->hasDefinition('router'))
-		{
-			$builder->getDefinition('router')
-				->addSetup('offsetSet', array (NULL, $router));
-		}
+			->addSetup('injectServiceMap', [$accounts]);
 	}
 
 	/**
@@ -58,23 +45,24 @@ class ChainExtension extends \Nette\DI\CompilerExtension
 	{
 		if (isset($definitions['id']))
 		{
-			$definitions = array ('default' => $definitions);
+			$definitions = ['default' => $definitions];
 		}
 
 		$builder = $this->getContainerBuilder();
-		$accounts = array ();
+		$accounts = [];
 
 		foreach ($definitions as $name => $account)
 		{
 			$account = $this->mergeConfig($account, self::$ACCOUNT_DEFAULTS);
 			$serviceName = $this->prefix('account.' . $name);
 
-			$service = $builder->addDefinition($serviceName)
-				->setClass(\Brosland\Chain\Account::class)
-				->setArguments(array (
-				$account['id'],
-				$account['secret']
-			));
+			$service = $builder->addDefinition($serviceName);
+			$service->setClass(\Brosland\Chain\Account::class)
+				->setArguments([
+					$account['id'],
+					$account['secret'],
+					$account['blockChain']
+			]);
 
 			if (!empty($accounts))
 			{
