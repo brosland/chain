@@ -2,8 +2,6 @@
 
 namespace Brosland\Chain;
 
-use DateTime;
-
 class Address extends \Nette\Object
 {
 	/**

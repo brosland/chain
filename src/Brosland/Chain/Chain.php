@@ -26,18 +26,21 @@ class Chain extends \Nette\Object
 	 */
 	public function getAccount($name)
 	{
-		if (!isset($this->serviceMap['accounts'][$name]))
+		if (!isset($this->serviceMap[$name]))
 		{
 			throw new \Nette\InvalidArgumentException("Unknown account {$name}.");
 		}
+
+		return $this->serviceLocator->getService($this->serviceMap[$name]);
 	}
 
 	/**
 	 * @internal
+	 * @param array $accounts
 	 */
 	public function injectServiceMap(array $accounts)
 	{
-		$this->serviceMap = array ('accounts' => $accounts);
+		$this->serviceMap = $accounts;
 	}
 
 	/**
