@@ -52,8 +52,9 @@ class Account extends \Nette\Object
 	public function getAddress($address)
 	{
 		$request = new Request($this->baseUrl . '/addresses/' . $address);
+		$response = $this->sendRequest($request);
 
-		return new Address($this->sendRequest($request));
+		return new Address($response[0]);
 	}
 
 	/**
