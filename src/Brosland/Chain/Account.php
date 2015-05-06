@@ -60,7 +60,7 @@ class Account extends \Nette\Object
 	 * Returns basic balance details for more Bitcoin addresses.
 	 * 
 	 * @link https://chain.com/docs#bitcoin-address
-	 * @param string[] $addresses
+	 * @param array $addresses
 	 * @return Address[]
 	 */
 	public function getAddresses(array $addresses)
