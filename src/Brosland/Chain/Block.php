@@ -17,7 +17,7 @@ class Block extends \Nette\Object
 	 */
 	public function __construct(array $block)
 	{
-		$block['time'] = DateTime::createFromFormat(DateTime::ISO8601, $block['time']);
+		$block['time'] = DateTime::createFromFormat('Y-m-d\TH:i:s.uO', $block['time']);
 
 		$this->block = $block;
 	}
@@ -73,7 +73,7 @@ class Block extends \Nette\Object
 	}
 
 	/**
-	 * The UTC time (in ISO8601 format) at which the block was created by the miner.
+	 * The time at which the block was created by the miner.
 	 * 
 	 * @return DateTime
 	 */

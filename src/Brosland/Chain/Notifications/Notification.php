@@ -79,7 +79,7 @@ abstract class Notification extends \Nette\Object
 	}
 
 	/**
-	 * The UTC time (in ISO8601 format) that the result was created.
+	 * The time that the result was created.
 	 * 
 	 * @return DateTime
 	 */

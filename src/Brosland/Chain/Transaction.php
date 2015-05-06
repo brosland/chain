@@ -83,7 +83,7 @@ class Transaction extends \Nette\Object
 	}
 
 	/**
-	 * The UTC time (in ISO8601 format) at which the block containing the transaction was created by the miner.
+	 * The time at which the block containing the transaction was created by the miner.
 	 * Contains "block_time": null for unconfirmed transactions.
 	 * 
 	 * @return DateTime
@@ -94,7 +94,7 @@ class Transaction extends \Nette\Object
 	}
 
 	/**
-	 * The UTC time (in ISO8601 format) at which Chain.com indexed this transaction.
+	 * The time at which Chain.com indexed this transaction.
 	 * Note that transactions confirmed prior to June 2014 may be null.
 	 * Therefore, when sorting transactions by this time, you should fall back on "block_time".
 	 * 
