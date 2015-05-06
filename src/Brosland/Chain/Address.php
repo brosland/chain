@@ -7,6 +7,14 @@ class Address extends \Nette\Object
 	/**
 	 * @var array
 	 */
+	private static $REQUIRED = [
+		'address',
+		'total' => ['balance', 'received', 'sent'],
+		'confirmed' => ['balance', 'received', 'sent']
+	];
+	/**
+	 * @var array
+	 */
 	private $address;
 
 
@@ -15,6 +23,8 @@ class Address extends \Nette\Object
 	 */
 	public function __construct(array $address)
 	{
+		Utils::checkRequiredFields(self::$REQUIRED, $address);
+
 		$this->address = $address;
 	}
 

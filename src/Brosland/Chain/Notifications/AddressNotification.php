@@ -4,6 +4,26 @@ namespace Brosland\Chain\Notifications;
 
 class AddressNotification extends Notification
 {
+	/**
+	 * @var array
+	 */
+	private static $REQUIRED = [
+		'payload' => [
+			'address', 'sent', 'received', 'input_addresses', 'output_addresses',
+			'transaction_hash', 'block_hash', 'confirmations'
+		]
+	];
+
+
+	/**
+	 * @param array $notification
+	 */
+	protected function __construct(array $notification)
+	{
+		parent::__construct($notification);
+
+		\Brosland\Chain\Utils::checkRequiredFields(self::$REQUIRED, $notification);
+	}
 
 	/**
 	 * The address for which the Result occurred.

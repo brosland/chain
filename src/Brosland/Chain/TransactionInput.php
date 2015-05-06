@@ -7,6 +7,13 @@ class TransactionInput extends \Nette\Object
 	/**
 	 * @var array
 	 */
+	private static $REQUIRED = [
+		'transaction_hash', 'output_hash', 'output_index', 'value', 'addresses',
+		'script_signature'
+	];
+	/**
+	 * @var array
+	 */
 	private $transactionInput;
 
 
@@ -15,6 +22,8 @@ class TransactionInput extends \Nette\Object
 	 */
 	public function __construct(array $transactionInput)
 	{
+		Utils::checkRequiredFields(self::$REQUIRED, $transactionInput);
+
 		$this->transactionInput = $transactionInput;
 	}
 

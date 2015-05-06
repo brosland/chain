@@ -9,6 +9,13 @@ class Transaction extends \Nette\Object
 	/**
 	 * @var array
 	 */
+	private static $REQUIRED = [
+		'hash', 'block_hash', 'block_height', 'block_time', 'chain_received_at',
+		'confirmations', 'lock_time', 'inputs', 'outputs', 'fees', 'amount'
+	];
+	/**
+	 * @var array
+	 */
 	private $transaction;
 
 
@@ -17,6 +24,8 @@ class Transaction extends \Nette\Object
 	 */
 	public function __construct(array $transaction)
 	{
+		Utils::checkRequiredFields(self::$REQUIRED, $transaction);
+
 		if (!empty($transaction['block_time']))
 		{
 			$transaction['block_time'] = DateTime::createFromFormat(

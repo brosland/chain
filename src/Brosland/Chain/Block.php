@@ -9,6 +9,13 @@ class Block extends \Nette\Object
 	/**
 	 * @var array
 	 */
+	private static $REQUIRED = [
+		'hash', 'previous_block_hash', 'height', 'confirmations', 'merkle_root',
+		'time', 'nonce', 'difficulty', 'transaction_hashes'
+	];
+	/**
+	 * @var array
+	 */
 	private $block;
 
 
@@ -17,6 +24,8 @@ class Block extends \Nette\Object
 	 */
 	public function __construct(array $block)
 	{
+		Utils::checkRequiredFields(self::$REQUIRED, $block);
+
 		$block['time'] = DateTime::createFromFormat('Y-m-d\TH:i:s.uO', $block['time']);
 
 		$this->block = $block;

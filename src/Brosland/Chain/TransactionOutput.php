@@ -7,6 +7,13 @@ class TransactionOutput extends \Nette\Object
 	/**
 	 * @var array
 	 */
+	private static $REQUIRED = [
+		'transaction_hash', 'output_index', 'value', 'script', 'script_hex',
+		'script_type', 'spent'
+	];
+	/**
+	 * @var array
+	 */
 	private $transactionOutput;
 
 
@@ -15,6 +22,13 @@ class TransactionOutput extends \Nette\Object
 	 */
 	public function __construct(array $transactionOutput)
 	{
+		Utils::checkRequiredFields(self::$REQUIRED, $transactionOutput);
+
+		if (!isset($this->transactionOutput['addresses']))
+		{
+			$this->transactionOutput['addresses'] = [];
+		}
+
 		$this->transactionOutput = $transactionOutput;
 	}
 
@@ -96,7 +110,8 @@ class TransactionOutput extends \Nette\Object
 	 */
 	public function getRequiredSignatures()
 	{
-		return $this->transactionOutput['required_signatures'];
+		return isset($this->transactionOutput['required_signatures']) ?
+			$this->transactionOutput['required_signatures'] : 1;
 	}
 
 	/**

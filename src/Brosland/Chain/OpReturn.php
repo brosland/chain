@@ -7,6 +7,12 @@ class OpReturn extends \Nette\Object
 	/**
 	 * @var array
 	 */
+	private static $REQUIRED = [
+		'transaction_hash', 'hex', 'text', 'sender_addresses', 'receiver_addresses'
+	];
+	/**
+	 * @var array
+	 */
 	private $opReturn;
 
 
@@ -15,6 +21,8 @@ class OpReturn extends \Nette\Object
 	 */
 	public function __construct(array $opReturn)
 	{
+		Utils::checkRequiredFields(self::$REQUIRED, $opReturn);
+
 		$this->opReturn = $opReturn;
 	}
 

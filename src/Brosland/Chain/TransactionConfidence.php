@@ -7,6 +7,12 @@ class TransactionConfidence extends \Nette\Object
 	/**
 	 * @var array
 	 */
+	private static $REQUIRED = [
+		'transaction_hash', 'block_hash', 'propagation_level', 'double_spend'
+	];
+	/**
+	 * @var array
+	 */
 	private $transactionConfidence;
 
 
@@ -15,6 +21,8 @@ class TransactionConfidence extends \Nette\Object
 	 */
 	public function __construct(array $transactionConfidence)
 	{
+		Utils::checkRequiredFields(self::$REQUIRED, $transactionConfidence);
+
 		$this->transactionConfidence = $transactionConfidence;
 	}
 

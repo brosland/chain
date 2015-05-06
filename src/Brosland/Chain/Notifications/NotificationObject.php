@@ -40,7 +40,7 @@ class NotificationObject extends \Nette\Object
 	/**
 	 * @param array $data
 	 */
-	private function __construct(array $data)
+	protected function __construct(array $data)
 	{
 		$this->data = $data;
 	}

@@ -11,7 +11,13 @@ abstract class Notification extends \Nette\Object
 		TYPE_NEW_BLOCK = 'new-block',
 		TYPE_NEW_TRANSACTION = 'new-transaction';
 
-
+	/**
+	 * @var array
+	 */
+	private static $REQUIRED = [
+		'payload' => ['type', 'block_chain'],
+		'id', 'created_at', 'delivery_attempt', 'notification_id'
+	];
 	/**
 	 * @var array
 	 */
@@ -43,6 +49,8 @@ abstract class Notification extends \Nette\Object
 	 */
 	protected function __construct(array $notification)
 	{
+		\Brosland\Chain\Utils::checkRequiredFields(self::$REQUIRED, $notification);
+
 		$this->notification = $notification;
 		$this->notification['created_at'] = DateTime::createFromFormat(
 				DateTime::ISO8601, $this->notification['created_at']);
