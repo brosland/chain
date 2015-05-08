@@ -138,7 +138,7 @@ class Transaction extends \Nette\Object
 	}
 
 	/**
-	 * @return TransactionInput
+	 * @return TransactionInput[]
 	 */
 	public function getInputs()
 	{
@@ -146,7 +146,7 @@ class Transaction extends \Nette\Object
 	}
 
 	/**
-	 * @return TransactionOutput
+	 * @return TransactionOutput[]
 	 */
 	public function getOutputs()
 	{
@@ -172,5 +172,43 @@ class Transaction extends \Nette\Object
 	public function getAmount()
 	{
 		return $this->transaction['amount'];
+	}
+
+	/**
+	 * @param string $address
+	 * @return string
+	 */
+	public function getReceived($address)
+	{
+		$received = 0;
+
+		foreach ($this->getOutputs() as $output)
+		{
+			if (in_array($address, $output->getAddresses()))
+			{
+				$received = Utils::add($received, $output->getValue());
+			}
+		}
+
+		return $received;
+	}
+
+	/**
+	 * @param string $address
+	 * @return string
+	 */
+	public function getSent($address)
+	{
+		$sent = 0;
+
+		foreach ($this->getInputs() as $input)
+		{
+			if (in_array($address, $input->getAddresses()))
+			{
+				$sent = Utils::add($sent, $input->getValue());
+			}
+		}
+
+		return $sent;
 	}
 }

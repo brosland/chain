@@ -32,4 +32,55 @@ class Utils extends \Nette\Object
 			}
 		}
 	}
+
+	/**
+	 * @param string $x In Satoshi.
+	 * @param string $y In Satoshi.
+	 * @return string
+	 */
+	public static function add($x, $y)
+	{
+		return bcadd($x, $y);
+	}
+
+	/**
+	 * @param string $x In Satoshi.
+	 * @param string $y In Satoshi.
+	 * @return string
+	 */
+	public static function sub($x, $y)
+	{
+		return bcsub($x, $y);
+	}
+
+	/**
+	 * @param string $x In Satoshi.
+	 * @param string $y In Satoshi.
+	 * @return string
+	 */
+	public static function mul($x, $y)
+	{
+		return bcmul($x, $y);
+	}
+
+	/**
+	 * @param string $x In Satoshi.
+	 * @param string $y In Satoshi.
+	 * @param int $precision
+	 * @return string
+	 */
+	public static function div($x, $y, $precision = 8)
+	{
+		return bcdiv($x, $y, $precision);
+	}
+
+	/**
+	 * @param string $x In Satoshi.
+	 * @param string $y In Satoshi.
+	 * @return int
+	 */
+	public static function compare($x, $y)
+	{
+		return bccomp($x, $y, 8);
+	}
 }
