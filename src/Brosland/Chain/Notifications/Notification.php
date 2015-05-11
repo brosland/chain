@@ -30,11 +30,11 @@ abstract class Notification extends \Nette\Object
 	 */
 	public static function createFromArray(array $notification)
 	{
-		if ($notification['type'] == self::TYPE_ADDRESS)
+		if ($notification['payload']['type'] == self::TYPE_ADDRESS)
 		{
 			return new AddressNotification($notification);
 		}
-		else if ($notification['type'] == self::TYPE_NEW_BLOCK)
+		else if ($notification['payload']['type'] == self::TYPE_NEW_BLOCK)
 		{
 			return new BlockNotification($notification);
 		}
