@@ -186,7 +186,7 @@ class Transaction extends \Nette\Object
 		{
 			if (in_array($address, $output->getAddresses()))
 			{
-				$received = Utils::add($received, $output->getValue());
+				$received = bcadd($received, $output->getValue());
 			}
 		}
 
@@ -205,7 +205,7 @@ class Transaction extends \Nette\Object
 		{
 			if (in_array($address, $input->getAddresses()))
 			{
-				$sent = Utils::add($sent, $input->getValue());
+				$sent = bcadd($sent, $input->getValue());
 			}
 		}
 
