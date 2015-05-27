@@ -25,7 +25,7 @@ class TransactionNotificationObject extends NotificationObject
 	 * 
 	 * @return string
 	 */
-	public function getTransaction()
+	public function getTransactionHash()
 	{
 		return $this->data['transaction_hash'];
 	}
