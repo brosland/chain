@@ -85,8 +85,8 @@ class TransactionInput extends \Nette\Object
 	 * 
 	 * @return string
 	 */
-	public function getScriptSignature()
+	public function getScriptSignatureHex()
 	{
-		return $this->transactionInput['script_signature'];
+		return $this->transactionInput['script_signature_hex'];
 	}
 }
